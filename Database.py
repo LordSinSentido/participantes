@@ -35,8 +35,7 @@ class Database:
         try:
             database = self.connect()
             cursor = database.cursor()
-            result = cursor.execute(
-                "SELECT * FROM users WHERE (first_name LIKE ? OR first_last_name LIKE ? OR second_last_name LIKE ?) ORDER BY first_name DESC", data)
+            result = cursor.execute(f"SELECT * FROM users WHERE (first_name LIKE \"{data}\" OR first_last_name LIKE \"{data}\" OR second_last_name LIKE \"{data}\") ORDER BY first_name DESC")
             database.commit()
         except Exception as e:
             if database:

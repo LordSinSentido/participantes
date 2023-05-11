@@ -65,9 +65,9 @@ class Application:
         for row in data:
             self.table.insert('', 0, text=row[0], values=row[1:])
 
-    def searchUsers(self, data):
+    def searchUsers(self, query):
         self.table.delete(*self.table.get_children())
-        data = self.database.searchUsers((data, data, data))
+        data = self.database.searchUsers(query)
         for row in data:
             self.table.insert('', 0, text=row[0], values=row[1:])
 
