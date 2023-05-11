@@ -10,36 +10,36 @@ class Form:
 
         self.window = Toplevel()
         self.window.title("Agregar participante" if values ==
-                          None else "Actualizar participante")
+                          None else "Detalles del participante")
 
-        form = Frame(self.window, bg="#00aaff", background="#00aaff")
-        form.grid(row=row, column=column, sticky=EW)
-
-        inputs = Frame(form)
-        inputs.grid(row=0, column=0, columnspan=2, sticky=EW)
+        form = LabelFrame(self.window, text="Formulario")
+        form.pack(fill=X, padx=5, pady=5)
 
         for i in range(0, 10):
-            container = Frame(inputs, pady=2)
-            Label(container, text=titles[i]).grid(
-                row=0, column=0, columnspan=2, sticky=EW)
-            self.formInputs[titles[i]] = Entry(container)
-            self.formInputs[titles[i]].grid(
-                row=0, column=3, columnspan=2, sticky=EW)
+            container = Frame(form)
+            label = Label(container, text=titles[i], width=15, anchor=W)
+            label.pack(side=LEFT)
+
+            self.formInputs[titles[i]] = Entry(container, width=25)
+            self.formInputs[titles[i]].pack(side=LEFT, fill=X, expand=True)
             if values:
                 self.formInputs[titles[i]].insert(
                     0, values[i] if values[i] != "None" else "")
 
-            container.grid(row=i, column=0, columnspan=2, sticky=EW)
+            container.pack(fill=X, expand=True, side=TOP)
 
-        if values:
-            Button(form, text="Actualizar", command=self.update).grid(
-                row=1, column=1, sticky=EW)
-        else:
-            Button(form, text="Guardar", command=self.save).grid(
-                row=1, column=1, sticky=EW)
+        actions = LabelFrame(self.window, text="Acciones")
+        actions.pack(fill=X, padx=5, pady=5)
+    	
+        if values is not None:
+            cancel = Button(actions, text="Eliminar", command=self.delete, width=10)
+            cancel.pack(fill=X, expand=True, padx=5, pady=5)
 
-        Button(form, text="Cancelar", command=self.close).grid(
-            row=1, column=0, sticky=EW)
+        cancel = Button(actions, text="Cancelar", command=self.close, width=10)
+        cancel.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
+
+        action = Button(actions, text="Guardar" if values == None else "Actualizar", command=self.save if values == None else self.update, width=10)
+        action.pack(side=LEFT, fill=X, expand=True, padx=5, pady=5)
 
     def close(self):
         return self.window.destroy()
@@ -75,3 +75,14 @@ class Form:
                 self.close()
         except Exception as e:
             print(e)
+
+    def delete(self):
+        try:
+            success = self.parent.database.deleteUser(str(self.identifier))
+
+            if success:
+                self.parent.getUsers()
+                self.close()
+        except Exception as e:
+            print(e)
+    

@@ -2,56 +2,64 @@ from tkinter import ttk
 from tkinter import *
 from Database import *
 from Form import *
+from tkinter.font import Font
 import sqlite3
 
 
 class Application:
     def __init__(self, window, database):
-        self.window = window
         self.database = database
+        self.window = window
+        self.window.title("Administrador de participantes")
+
+        self.formInputs = {}
         self.columns = ('first_name', 'first_last_name', 'second_last_name',
                         'age', 'gender', 'school', 'address', 'curp', 'category', 'fee')
         self.titles = ('Nombre', 'Apellido paterno', 'Apellido materno',
                        'Edad', 'Sexo', 'Escuela', 'Domicilio', 'CURP', 'Categoría', 'Inscripción')
-        self.formInputs = {}
 
-        self.window.title("Administrador de participantes")
+        title = Label(
+            self.window, text="Sistema de gestión de participantes")
+        title.pack()
 
+        self.header = Frame(self.window)
+        self.header.pack(fill=X, padx=5, pady=5)
+
+        self.add()
         self.searchBar()
         self.table()
-
-        delete = Button(self.window, text="Eliminar", command=self.deleteUser)
-        delete.grid(row=5, column=0, sticky=EW)
-
-        edit = Button(self.window, text="Editar", command=self.updateUser)
-        edit.grid(row=5, column=1, sticky=EW)
-
-        add = Button(self.window, text="Agregar", command=self.addUser)
-        add.grid(row=5, column=2, sticky=EW)
 
         self.window.mainloop()
         pass
 
     def searchBar(self):
-        # container = Frame(self.window)
-        # container.grid(row=0, column=0, columnspan=12, sticky=EW)
+        container = LabelFrame(
+            self.header, text="Buscar por nombre o apellidos")
+        container.pack(fill=X, expand=True, side=LEFT)
 
-        searchInput = Entry(self.window)
-        searchInput.grid(row=0, column=0, columnspan=8, sticky=EW)
+        searchInput = Entry(container)
+        searchInput.pack(expand=True, fill=BOTH, side=LEFT, padx=5, pady=5)
 
-        clearButton = Button(self.window, text="Limpiar",
-                             command=lambda: self.getUsers())
-        clearButton.grid(row=0, column=8, columnspan=2, sticky=EW)
+        clearButton = Button(container, text="Limpiar",
+                             command=lambda: self.getUsers(), width=10)
+        clearButton.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
-        searchButton = Button(self.window, text="Buscar", command=lambda: self.searchUsers(
-            "%" + searchInput.get() + "%"))
-        searchButton.grid(row=0, column=10, columnspan=2, sticky=EW)
+        searchButton = Button(container, text="Buscar", command=lambda: self.searchUsers(
+            "%" + searchInput.get() + "%"), width=10)
+        searchButton.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
+
+    def add(self):
+        container = LabelFrame(self.header, text="Agregar")
+        container.pack(side=LEFT)
+
+        add = Button(container, text="Agregar", command=self.addUser, width=10)
+        add.pack(padx=5, pady=5)
 
     def table(self):
         self.table = ttk.Treeview(
             height=15, columns=self.columns, show='headings')
-        self.table.grid(row=2, columnspan=12, column=0)
-        self.table.bind("<Double-1>", self.open_toplevel)
+        self.table.pack(fill=BOTH, expand=True, padx=5, pady=5)
+        self.table.bind("<Double-1>", self.showUser)
 
         for index, column in enumerate(self.columns):
             self.table.heading(column, text=self.titles[index], anchor=W)
@@ -71,38 +79,14 @@ class Application:
         for row in data:
             self.table.insert('', 0, text=row[0], values=row[1:])
 
-    def deleteUser(self):
-        try:
-            item = self.table.item(self.table.selection())['text']
-            self.database.deleteUser((str(item),))
-        except Exception as e:
-            print(e)
-        finally:
-            self.getUsers()
-        print(item)
-        pass
-
-    def updateUser(self):
-        self.editForm = Toplevel()
-        self.editForm.title("Editar usuario")
-        form = Form(self, 0, 0, self.titles)
-
     def addUser(self):
-        # self.editForm = Toplevel()
-        # self.editForm.title("Editar usuario")
         form = Form(self, 0, 0, self.titles)
 
-    def open_toplevel(self, event):
-        selected_item = self.table.focus()  # obtenemos el item seleccionado
-        if selected_item:  # si se seleccionó un item
+    def showUser(self, event):
+        selected_item = self.table.focus()
+        if selected_item:
             form = Form(self, 0, 0, self.titles, self.table.item(selected_item)[
                         'values'], self.table.item(selected_item)['text'])
-            # pass
-
-            # toplevel = Toplevel()
-            # toplevel.geometry("200x100")
-            # label = Label(toplevel, text=f"Item seleccionado: {self.table.item(selected_item)['values']}")
-            # label.pack()
 
 
 if __name__ == "__main__":

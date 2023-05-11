@@ -35,7 +35,8 @@ class Database:
         try:
             database = self.connect()
             cursor = database.cursor()
-            result = cursor.execute(f"SELECT * FROM users WHERE (first_name LIKE \"{data}\" OR first_last_name LIKE \"{data}\" OR second_last_name LIKE \"{data}\") ORDER BY first_name DESC")
+            result = cursor.execute(
+                f"SELECT * FROM users WHERE (first_name LIKE \"{data}\" OR first_last_name LIKE \"{data}\" OR second_last_name LIKE \"{data}\") ORDER BY first_name DESC")
             database.commit()
         except Exception as e:
             if database:
@@ -73,12 +74,12 @@ class Database:
             print(e)
             return False
 
-    def deleteUser(self, item):
+    def deleteUser(self, identifier):
         try:
             database = self.connect()
             cursor = database.cursor()
             result = cursor.execute(
-                "DELETE FROM users WHERE id = ?", item)
+                f"DELETE FROM users WHERE id = \"{identifier}\"")
             database.commit()
             return True
         except Exception as e:
