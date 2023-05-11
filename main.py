@@ -1,6 +1,7 @@
 from tkinter import ttk
 from tkinter import *
 from Database import *
+from Form import *
 import sqlite3
 
 
@@ -16,50 +17,41 @@ class Application:
 
         self.window.title("Administrador de participantes")
 
-        self.form()
+        self.searchBar()
         self.table()
+
+        delete = Button(self.window, text="Eliminar", command=self.deleteUser)
+        delete.grid(row=5, column=0, sticky=EW)
+
+        edit = Button(self.window, text="Editar", command=self.updateUser)
+        edit.grid(row=5, column=1, sticky=EW)
+
+        add = Button(self.window, text="Agregar", command=self.addUser)
+        add.grid(row=5, column=2, sticky=EW)
 
         self.window.mainloop()
         pass
 
-    def form(self):
+    def searchBar(self):
+        # container = Frame(self.window)
+        # container.grid(row=0, column=0, columnspan=12, sticky=EW)
 
-        def save():
-            objects = self.formInputs.values()
-            values = []
+        searchInput = Entry(self.window)
+        searchInput.grid(row=0, column=0, columnspan=8, sticky=EW)
 
-            for value in objects:
-                values.append(value.get() if value.get() != "" else None)
+        clearButton = Button(self.window, text="Limpiar",
+                             command=lambda: self.getUsers())
+        clearButton.grid(row=0, column=8, columnspan=2, sticky=EW)
 
-            print(values)
-            self.database.postUser(data=values)
-            self.getUsers()
-            pass
-
-        form = Frame(self.window)
-        form.grid(row=0, column=0, sticky=EW)
-
-        inputs = Frame(form, bg="#00aaff")
-        inputs.grid(row=0, column=0, sticky=EW)
-
-        for i in range(0, 10):
-            container = Frame(inputs)
-            Label(container, text=self.titles[i]).grid(
-                row=1, column=0, sticky=EW)
-            self.formInputs[self.titles[i]] = Entry(container)
-            self.formInputs[self.titles[i]].grid(row=1, column=1, sticky=EW)
-
-            container.grid(row=i, sticky=EW)
-
-        Button(form, text="Guardar", command=save).grid(
-            row=1, columnspan=2, sticky=W+E)
-
-        pass
+        searchButton = Button(self.window, text="Buscar", command=lambda: self.searchUsers(
+            "%" + searchInput.get() + "%"))
+        searchButton.grid(row=0, column=10, columnspan=2, sticky=EW)
 
     def table(self):
         self.table = ttk.Treeview(
-            height=25, columns=self.columns, show='headings')
-        self.table.grid(row=4, column=0)
+            height=15, columns=self.columns, show='headings')
+        self.table.grid(row=2, columnspan=12, column=0)
+        self.table.bind("<Double-1>", self.open_toplevel)
 
         for index, column in enumerate(self.columns):
             self.table.heading(column, text=self.titles[index], anchor=W)
@@ -71,9 +63,46 @@ class Application:
         self.table.delete(*self.table.get_children())
         data = self.database.getUsers()
         for row in data:
-            self.table.insert('', 0, text=self.titles[1], values=row[1:])
+            self.table.insert('', 0, text=row[0], values=row[1:])
 
+    def searchUsers(self, data):
+        self.table.delete(*self.table.get_children())
+        data = self.database.searchUsers((data, data, data))
+        for row in data:
+            self.table.insert('', 0, text=row[0], values=row[1:])
+
+    def deleteUser(self):
+        try:
+            item = self.table.item(self.table.selection())['text']
+            self.database.deleteUser((str(item),))
+        except Exception as e:
+            print(e)
+        finally:
+            self.getUsers()
+        print(item)
         pass
+
+    def updateUser(self):
+        self.editForm = Toplevel()
+        self.editForm.title("Editar usuario")
+        form = Form(self, 0, 0, self.titles)
+
+    def addUser(self):
+        # self.editForm = Toplevel()
+        # self.editForm.title("Editar usuario")
+        form = Form(self, 0, 0, self.titles)
+
+    def open_toplevel(self, event):
+        selected_item = self.table.focus()  # obtenemos el item seleccionado
+        if selected_item:  # si se seleccionó un item
+            form = Form(self, 0, 0, self.titles, self.table.item(selected_item)[
+                        'values'], self.table.item(selected_item)['text'])
+            # pass
+
+            # toplevel = Toplevel()
+            # toplevel.geometry("200x100")
+            # label = Label(toplevel, text=f"Item seleccionado: {self.table.item(selected_item)['values']}")
+            # label.pack()
 
 
 if __name__ == "__main__":
