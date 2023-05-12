@@ -1,15 +1,17 @@
 from tkinter import ttk
 from tkinter import *
 from Database import *
+from Exporter import *
 from Form import *
 from tkinter.font import Font
 import sqlite3
 
 
 class Application:
-    def __init__(self, window, database):
+    def __init__(self, window, database, exporter):
         self.database = database
         self.window = window
+        self.exporter = exporter
         self.window.title("Administrador de participantes")
 
         self.formInputs = {}
@@ -19,7 +21,7 @@ class Application:
                        'Edad', 'Sexo', 'Escuela', 'Domicilio', 'CURP', 'Categoría', 'Inscripción')
 
         title = Label(
-            self.window, text="Sistema de gestión de participantes")
+            self.window, text="Sistema de gestión de participantes", font=Font(size=16, weight="bold"))
         title.pack()
 
         self.header = Frame(self.window)
@@ -28,6 +30,10 @@ class Application:
         self.add()
         self.searchBar()
         self.table()
+
+        # clearButton = Button(self.window, text="GET", command=lambda: exporter.getTicket(
+        #     ("Adriana", "Castillo", "Uribe")), width=10)
+        # clearButton.pack(fill=BOTH, side=LEFT, padx=5, pady=5)
 
         self.window.mainloop()
         pass
@@ -91,6 +97,7 @@ class Application:
 
 if __name__ == "__main__":
     database = Database("data.db")
+    exporter = Exporter()
     window = Tk()
-    Application(window, database)
+    Application(window, database, exporter)
     pass
