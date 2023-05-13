@@ -33,40 +33,42 @@ class Form:
             container.pack(fill=X, expand=True, side=TOP)
 
         # Sección de impresión de tickets
-        prints = LabelFrame(self.window, text="Impresiones")
-        prints.pack(fill=X, padx=5, pady=5)
+        if values != None:
+            prints = LabelFrame(self.window, text="Impresiones")
+            prints.pack(fill=X, padx=5, pady=5)
 
-        container = Frame(prints)
+            container = Frame(prints)
 
-        label = Label(container, text="Tipo de archivo", width=15, anchor=W)
-        label.pack(side=LEFT)
+            label = Label(container, text="Tipo de archivo",
+                          width=15, anchor=W)
+            label.pack(side=LEFT)
 
-        extension = ttk.Combobox(
-            container, values=["DOCX", "PDF", "TXT"], state="readonly")
-        extension.current(0)
-        extension.pack(side=LEFT, fill=X, expand=True)
+            extension = ttk.Combobox(
+                container, values=["DOCX", "PDF", "TXT"], state="readonly")
+            extension.current(0)
+            extension.pack(side=LEFT, fill=X, expand=True)
 
-        container.pack(fill=X, expand=True, padx=5, pady=5)
+            container.pack(fill=X, expand=True, padx=5, pady=5)
 
-        ticket = Button(prints, text="Comprobante de pago",
-                        command=lambda: self.getTicket(extension.get()), width=10)
-        ticket.pack(fill=X, expand=True, padx=5, pady=5)
-
-        certificate = Button(prints, text="Certificado",
-                             command=lambda: self.getTicket(extension.get()), width=10)
-        certificate.pack(fill=X, expand=True, padx=5, pady=5)
-
-        firstPlace = Button(prints, text="Primer lugar",
+            ticket = Button(prints, text="Comprobante de pago",
                             command=lambda: self.getTicket(extension.get()), width=10)
-        firstPlace.pack(fill=X, expand=True, padx=5, pady=5)
+            ticket.pack(fill=X, expand=True, padx=5, pady=5)
 
-        secondPlace = Button(prints, text="Segundo lugar",
-                             command=lambda: self.getTicket(extension.get()), width=10)
-        secondPlace.pack(fill=X, expand=True, padx=5, pady=5)
+            certificate = Button(prints, text="Certificado",
+                                 command=lambda: self.getCertificate(extension.get()), width=10)
+            certificate.pack(fill=X, expand=True, padx=5, pady=5)
 
-        thirdPlace = Button(prints, text="Tercer lugar",
-                            command=lambda: self.getTicket(extension.get()), width=10)
-        thirdPlace.pack(fill=X, expand=True, padx=5, pady=5)
+            firstPlace = Button(prints, text="Primer lugar",
+                                command=lambda: self.getAward(1, extension.get()), width=10)
+            firstPlace.pack(fill=X, expand=True, padx=5, pady=5)
+
+            secondPlace = Button(prints, text="Segundo lugar",
+                                 command=lambda: self.getAward(2, extension.get()), width=10)
+            secondPlace.pack(fill=X, expand=True, padx=5, pady=5)
+
+            thirdPlace = Button(prints, text="Tercer lugar",
+                                command=lambda: self.getAward(3, extension.get()), width=10)
+            thirdPlace.pack(fill=X, expand=True, padx=5, pady=5)
 
         # Sección de acciones
         actions = LabelFrame(self.window, text="Acciones")
@@ -97,7 +99,7 @@ class Form:
         button.pack(fill=X, expand=True, padx=5, pady=5)
 
     def getCertificate(self, extension):
-        success = self.exporter.getTicket(self.values, extension)
+        success = self.exporter.getCertificate(self.values, extension)
 
         alert = Toplevel()
         alert.title("Alerta")
@@ -108,8 +110,8 @@ class Form:
         button = Button(alert, text="Aceptar", width=10, command=alert.destroy)
         button.pack(fill=X, expand=True, padx=5, pady=5)
 
-    def getAward(self, extension):
-        success = self.exporter.getTicket(self.values, extension)
+    def getAward(self, place, extension):
+        success = self.exporter.getAward(self.values, place, extension)
 
         alert = Toplevel()
         alert.title("Alerta")
@@ -132,7 +134,6 @@ class Form:
 
         try:
             success = self.parent.database.postUser(data=values)
-            print(success)
             if success:
                 self.parent.getUsers()
                 self.close()
@@ -149,7 +150,6 @@ class Form:
         try:
             success = self.parent.database.patchUser(
                 data=(*values, self.identifier))
-            print(success)
             if success:
                 self.parent.getUsers()
                 self.close()

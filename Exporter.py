@@ -60,3 +60,83 @@ class Exporter:
         except Exception as e:
             print(e)
             return False
+
+    def getCertificate(self, data, extension="DOCX"):
+        try:
+            document = Document("drafts/certificates.docx")
+            table = document.tables[0]
+
+            print("Hola")
+
+            # Agrega el nombre completo
+            fullName = f"{data[0]} {data[1]} {data[2]}"
+            table.cell(1, 0).paragraphs[1].text = fullName
+
+            # Agrega la categoría
+            table.cell(2, 0).paragraphs[1].text = f"{data[8]}"
+
+            if extension == "DOCX":
+                document.save(f"saves/certificates/{fullName}.docx")
+
+            else:
+                document.save(f"temp/{fullName}.docx")
+
+                if extension == "PDF":
+                    convert(f"temp/{fullName}.docx",
+                            f"saves/certificates/{fullName}.pdf")
+
+                elif extension == "TXT":
+                    textFile = open(
+                        f"saves/certificates/{fullName}.txt", 'w', encoding='utf-8')
+                    textFile.write(docx2txt.process(f"temp/{fullName}.docx"))
+
+                os.remove(f"temp/{fullName}.docx")
+
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+    def getAward(self, data, place, extension="DOCX"):
+        try:
+            document = Document("drafts/awards.docx")
+            table = document.tables[0]
+
+            # Agrega el nombre completo
+            fullName = f"{data[0]} {data[1]} {data[2]}"
+            table.cell(1, 0).paragraphs[1].text = fullName
+
+            # Agrega la categoría
+            table.cell(2, 0).paragraphs[1].text = f"{data[8]}"
+
+            # Agrega el lugar del podio
+            cell = table.cell(3, 0).paragraphs[1]
+
+            if place == 1:
+                cell.text = "1er lugar"
+            elif place == 2:
+                cell.text = "2do lugar"
+            elif place == 3:
+                cell.text = "3er lugar"
+
+            if extension == "DOCX":
+                document.save(f"saves/awards/{fullName}.docx")
+
+            else:
+                document.save(f"temp/{fullName}.docx")
+
+                if extension == "PDF":
+                    convert(f"temp/{fullName}.docx",
+                            f"saves/awards/{fullName}.pdf")
+
+                elif extension == "TXT":
+                    textFile = open(
+                        f"saves/awards/{fullName}.txt", 'w', encoding='utf-8')
+                    textFile.write(docx2txt.process(f"temp/{fullName}.docx"))
+
+                os.remove(f"temp/{fullName}.docx")
+
+            return True
+        except Exception as e:
+            print(e)
+            return False
